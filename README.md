@@ -1,13 +1,15 @@
 # nutrulii
 
-a nutrition analyzing application to help you with your goals
+This project integrates with an external API, Edamam, for retrieving nutritional data for ingredients and recipes using Python.
 
-abiduli blblblalasda duli
+## Features
 
-zaaa xdd
+- Integration with Edamam API for nutritional data retrieval.
+- Error handling for API responses.
+- Basic unit tests for API functionality. (WIP)
 
-testing see if everythin works duli
+## Requirements
 
-testing push
-
-last test to see if it works
+- Python 3.x
+- Requests library (`pip install requests`)
+- Edamam API credentials (APP_ID and APP_KEY)
