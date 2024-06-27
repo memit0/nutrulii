@@ -11,8 +11,8 @@ class TestGetNutritionData(unittest.TestCase):
         result = get_nutrition_data(ingredient)
 
         # Check if the result contains expected keys or values
-        self.assertIn('totalNutrients', result)
         self.assertIn('calories', result)
+        self.assertIn('totalNutrients', result)
 
         # Capture stdout for checking print statements
         captured_output = StringIO()
