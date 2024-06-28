@@ -39,6 +39,20 @@ def get_stored_nutrition_data(ingredient):
         return json.loads(row[0])
     return None
 
+def list_available_foods():
+    """List all available foods stored in the database."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('SELECT DISTINCT ingredient FROM nutrition_data')
+    rows = cursor.fetchall()
+    conn.close()
+    if rows:
+        print("Available foods in the database:")
+        for row in rows:
+            print(row[0])
+    else:
+        print("No foods available in the database.")
+
 def get_nutrition_data(ingredient, nutrition_type='cooking', print_output=True):
     """Fetch nutrition data for a given ingredient."""
     stored_data = get_stored_nutrition_data(ingredient)
@@ -91,28 +105,45 @@ def get_nutrition_details(recipe):
 def display_nutrition_data(data):
     """Display the nutrition data in a formatted table."""
     table = PrettyTable()
-    table.field_names = ["Nutrient", "Quantity", "Unit"]
+    table.field_names = ["Nutrient", "Amount Per Serving", "% Daily Value*"]
 
-    essential_nutrients = [
-        'ENERC_KCAL', 'FAT', 'FASAT', 'CHOCDF', 'FIBTG', 'SUGAR', 'PROCNT', 'NA'
-    ]
+    essential_nutrients = {
+        'ENERC_KCAL': ('Calories', None),
+        'FAT': ('Total Fat', 65),
+        'FASAT': ('Saturated Fat', 20),
+        'TRANSFAT': ('Trans Fat', None),
+        'CHOLE': ('Cholesterol', 300),
+        'NA': ('Sodium', 2400),
+        'CHOCDF': ('Total Carbohydrate', 300),
+        'FIBTG': ('Dietary Fiber', 25),
+        'SUGAR': ('Total Sugars', None),
+        'PROCNT': ('Protein', 50),
+        'VITD': ('Vitamin D', 20),
+        'CA': ('Calcium', 1300),
+        'FE': ('Iron', 18),
+        'K': ('Potassium', 4700)
+    }
 
-    for nutrient in essential_nutrients:
+    for nutrient, (label, daily_value) in essential_nutrients.items():
         if nutrient in data['totalNutrients']:
-            table.add_row([
-                data['totalNutrients'][nutrient]['label'],
-                round(data['totalNutrients'][nutrient]['quantity'], 2),
-                data['totalNutrients'][nutrient]['unit']
-            ])
+            amount = round(data['totalNutrients'][nutrient]['quantity'], 1)
+            unit = data['totalNutrients'][nutrient]['unit']
+            daily_value_percent = f"{round((amount / daily_value) * 100)}%" if daily_value else "-"
+            table.add_row([label, f"{amount} {unit}", daily_value_percent])
 
+    print("Amount Per Serving")
     print(table)
+    print("% Daily Value*")
 
 def main():
     """Main function to run the nutrition analysis program."""
     print("Welcome to Nutriuli!")
     while True:
+        
+
         choice = input("Are you making a recipe or tracking ingredients separately? (r/i): ").lower()
         if choice == 'r':
+            recipe_name = input("Enter the name of your recipe: ")
             ingredients = []
             print("Enter ingredients with measurements (e.g., '1 cup of rice', '1 oz of chickpeas'). Type 'done' when finished.")
             while True:
@@ -122,7 +153,7 @@ def main():
                 ingredients.append(ingredient)
             if ingredients:
                 recipe = {
-                    "title": "User Recipe",
+                    "title": recipe_name,
                     "ingr": ingredients
                 }
                 get_nutrition_details(recipe)
@@ -136,7 +167,7 @@ def main():
         if continue_choice != 'yes':
             break
 
-# Initialize the database
+# Initialize the database and prepopulate with some example foods
 init_db()
 
 # Run the main function
